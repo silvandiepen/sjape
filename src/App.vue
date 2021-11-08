@@ -1,27 +1,32 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <Blocks />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
+import Blocks from "./components/Blocks.vue";
 
 export default defineComponent({
   name: "App",
   components: {
-    HelloWorld,
+    Blocks,
   },
 });
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #21213a;
+  background-image: linear-gradient(#21213a, darken(#21213a, 10%));
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
