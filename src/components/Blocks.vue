@@ -12,24 +12,10 @@
       @click="changeBlock(idx)"
     />
   </div>
-  <!-- 
-  <div class="blocks blocks--test">
-    <div
-      v-for="(block, idx) in testBlocks"
-      :key="idx"
-      :class="[
-        'blocks__block',
-        `blocks__block--${block.type}`,
-        `blocks__block--${block.color}`,
-      ]"
-      @mouseover="changeBlock(idx)"
-      @click="changeBlock(idx)"
-    />
-  </div> -->
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 
 enum BlockType {
   SQUARE = "square",
@@ -84,28 +70,30 @@ export default defineComponent({
       return block;
     };
 
-    for (let i = 1; i < total * total; i++) {
-      blocks.value.push(getRandomBlock());
-    }
+    const initBlocks = () => {
+      const stored = localStorage.getItem("sjapes");
+
+      if (stored) {
+        blocks.value = JSON.parse(stored) as Block[];
+      } else {
+        for (let i = 1; i < total * total; i++) {
+          blocks.value.push(getRandomBlock());
+        }
+      }
+    };
+
+    onMounted(() => {
+      initBlocks();
+    });
 
     const changeBlock = (id: number) => {
       blocks.value[id] = getRandomBlock();
+      localStorage.setItem("sjapes", JSON.stringify(blocks.value));
     };
-
-    const testBlocks = ref([emptyBlock]);
-    testBlocks.value.length = 0;
-
-    for (let i = 0; i < types.length; i++) {
-      testBlocks.value.push({
-        color: BlockColor.WHITE,
-        type: types[i],
-      });
-    }
 
     return {
       total,
       blocks,
-      testBlocks,
       changeBlock,
     };
   },
