@@ -219,7 +219,7 @@ $percentage: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
       box-shadow: inset 0 0 calc(var(--line) * 4) 0em var(--shape-color);
-      transition: all 0.3s ease-in-out;
+      transition: all 0.15s ease-in-out;
     }
 
     // Colors
