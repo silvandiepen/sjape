@@ -180,6 +180,11 @@ $percentage: 50%;
   width: 75vmin;
   height: 75vmin;
 
+  @media screen and (max-width: 960px) {
+    width: 90vmin;
+    height: 90vmin;
+  }
+
   &--test {
     margin-top: 10em;
     .blocks__block {
