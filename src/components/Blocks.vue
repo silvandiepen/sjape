@@ -86,9 +86,26 @@ export default defineComponent({
       initBlocks();
     });
 
+    const createUrl = () => {
+      const url: string[] = [];
+
+      blocks.value.forEach((block) => {
+        const colorIdx = colors.findIndex((color) => color === block.color);
+        const typeIdx = types.findIndex((type) => type === block.type);
+
+        url.push(`${colorIdx}:${typeIdx}`);
+      });
+      return url.join("|");
+    };
+
+    const setRoute = () => {
+      // console.log(createUrl());
+    };
+
     const changeBlock = (id: number) => {
       blocks.value[id] = getRandomBlock();
       localStorage.setItem("sjapes", JSON.stringify(blocks.value));
+      setRoute();
     };
 
     return {
@@ -151,7 +168,6 @@ $percentage: 50%;
     }
 
     // Colors
-
     &--red::before {
       --shape-color: #{mix(red, $shade, $percentage)};
     }
@@ -166,7 +182,6 @@ $percentage: 50%;
     }
 
     // Shapes
-
     &--square::before {
       border-radius: 0;
       width: 50%;
@@ -179,10 +194,6 @@ $percentage: 50%;
       height: 66.66%;
       transform: translate(-50%, -50%) scale(1, 1) rotate(45deg);
     }
-    &--circle {
-      // box-shadow: inset 0 0 0 2em var(--shape-color);
-    }
-
     &--corner1::before,
     &--corner2::before,
     &--corner3::before,
@@ -232,12 +243,6 @@ $percentage: 50%;
     &--moon-line4::before {
       transform: translate(-75%, -75%);
     }
-    &--circle {
-      // background-color: mix(yellow, $shade, 75%);
-    }
-    &--circle {
-      // background-color: mix(yellow, $shade, 75%);
-    }
     &--moon1::before {
       transform: translate(-25%, -25%);
       width: 200%;
@@ -258,7 +263,6 @@ $percentage: 50%;
       width: 200%;
       height: 200%;
     }
-
     &--dot::before {
       transform: translate(-50%, -50%) scale(0.5);
     }
