@@ -15,7 +15,7 @@
       @click="changeBlock(idx, BlockAction.CLICK)"
     />
   </div>
-  <div class="info-block" v-if="state.showInfo">
+  <div class="info-block" :class="state.showInfo && `info-block--active`">
     <div
       class="info-block__background"
       @click="state.showInfo = !state.showInfo"
@@ -23,36 +23,18 @@
     <div class="info-block__container">
       <div class="info-block__config">
         <button
+          v-for="(setting, idx) in settingsMenu"
+          :key="idx"
           class="button info-block__hover"
-          :class="!state.hover && `info-block__hover--disabled`"
-          @click="setSetting(SettingAction.HOVER, !state.hover)"
+          :class="[
+            'button',
+            `info-block__${setting.name}`,
+            !setting.state && `info-block__${setting.name}--disabled`,
+          ]"
+          @click="setting.action()"
         >
-          <span v-if="state.hover">Hover enabled</span>
-          <span v-if="!state.hover">Hover disabled</span>
-        </button>
-        <button
-          class="button info-block__click"
-          :class="!state.click && `info-block__click--disabled`"
-          @click="setSetting(SettingAction.CLICK, !state.click)"
-        >
-          <span v-if="state.click">Click enabled</span>
-          <span v-if="!state.click">Click disabled</span>
-        </button>
-        <button
-          class="button info-block__random"
-          :class="!state.random && `info-block__random--disabled`"
-          @click="setSetting(SettingAction.RANDOM, !state.random)"
-        >
-          <span v-if="state.random">Random shapes</span>
-          <span v-if="!state.random">Ordered shapes</span>
-        </button>
-        <button
-          class="button info-block__audio"
-          :class="!state.audio && `info-block__audio--disabled`"
-          @click="setSetting(SettingAction.AUDIO, !state.audio)"
-        >
-          <span v-if="state.audio">Playing sounds</span>
-          <span v-if="!state.audio">Muted</span>
+          <span v-if="setting.state">{{ setting.label.disabled }}</span>
+          <span v-if="!setting.state">{{ setting.label.disabled }}</span>
         </button>
       </div>
       <div class="info-block__list">
@@ -80,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from "vue";
+import { defineComponent, onMounted, reactive, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
   BlockAction,
@@ -110,6 +92,41 @@ export default defineComponent({
       blocks: [],
     });
 
+    /*
+
+      Initialize
+
+    */
+
+    const initBlocks = () => {
+      restoreSettings();
+
+      const url = deCompileUrl();
+      const stored = localStorage.getItem("sjapes-blocks");
+      const fromLocal = stored && (JSON.parse(stored) as Block[]);
+
+      for (let i = 0; i < state.total * state.total; i++) {
+        let value: Block;
+        if (url[i]) {
+          value = url[i] as Block;
+        } else if (fromLocal && fromLocal[i]) {
+          value = fromLocal[i];
+        } else {
+          value = getRandomBlock();
+        }
+        state.blocks.push(value);
+      }
+    };
+
+    onMounted(() => {
+      initBlocks();
+    });
+
+    /*
+
+      Blocks
+
+    */
     const getRandomBlock = (): Block => {
       const block: Block = {
         type: state.types[Math.floor(Math.random() * state.types.length)],
@@ -140,36 +157,12 @@ export default defineComponent({
       return next;
     };
 
-    const initBlocks = () => {
-      restoreSettings();
+    /*
 
-      const url = deCompileUrl();
-      const stored = localStorage.getItem("sjapes-blocks");
-      const fromLocal = stored && (JSON.parse(stored) as Block[]);
+      Urls
 
-      for (let i = 0; i < state.total * state.total; i++) {
-        let value: Block;
-        if (url[i]) {
-          value = url[i] as Block;
-        } else if (fromLocal && fromLocal[i]) {
-          value = fromLocal[i];
-        } else {
-          value = getRandomBlock();
-        }
-        state.blocks.push(value);
-      }
-    };
-
-    onMounted(() => {
-      initBlocks();
-    });
-
-    const playSound = () => {
-      var audio = new Audio("/pop.mp3");
-      audio.play();
-    };
-
-    const deCompileUrl = () =>
+    */
+    const deCompileUrl = (): Block[] =>
       route.hash
         .replace("#", "")
         .split("|")
@@ -183,7 +176,7 @@ export default defineComponent({
           };
         });
 
-    const createUrl = () => {
+    const createUrl = (): string => {
       const url: string[] = [];
 
       state.blocks.forEach((block) => {
@@ -197,12 +190,18 @@ export default defineComponent({
       return `#${url.join("|")}`;
     };
 
-    const setRoute = () => {
+    /*
+
+      Actions
+
+    */
+
+    const setRoute = (): void => {
       const url = createUrl();
       router.push({ name: "Home", hash: url });
     };
 
-    const changeBlock = (id: number, action: BlockAction) => {
+    const changeBlock = (id: number, action: BlockAction): void => {
       if (
         (action == BlockAction.HOVER && state.hover) ||
         (action == BlockAction.CLICK && state.click)
@@ -217,7 +216,18 @@ export default defineComponent({
       }
     };
 
-    const storeSettings = () => {
+    const playSound = (): void => {
+      var audio = new Audio("/pop.mp3");
+      audio.volume = 0.1;
+      audio.play();
+    };
+
+    /*
+
+      Settings
+
+    */
+    const storeSettings = (): void => {
       const settings = {
         hover: state.hover,
         random: state.random,
@@ -227,7 +237,7 @@ export default defineComponent({
       localStorage.setItem("sjapes-settings", JSON.stringify(settings));
     };
 
-    const restoreSettings = () => {
+    const restoreSettings = (): void => {
       const settings = JSON.parse(
         localStorage.getItem("sjapes-settings") || "{}"
       );
@@ -257,12 +267,68 @@ export default defineComponent({
       storeSettings();
     };
 
+    interface SettingMenu {
+      name: string;
+      action: () => void;
+      state: boolean;
+      label: {
+        enabled: string;
+        disabled: string;
+      };
+    }
+
+    const settingsMenu = computed(() => [
+      {
+        name: "hover",
+        action: () => {
+          setSetting(BlockSettingChange.HOVER, !state.hover);
+        },
+        state: state.hover,
+        label: {
+          enabled: "Hover enabled",
+          disabled: "Hover disabled",
+        },
+      },
+      {
+        name: "click",
+        action: () => {
+          setSetting(BlockSettingChange.CLICK, !state.click);
+        },
+        state: state.click,
+        label: {
+          enabled: "Clicking enabled",
+          disabled: "Clicking disabled",
+        },
+      },
+      {
+        name: "audio",
+        action: () => {
+          setSetting(BlockSettingChange.AUDIO, !state.audio);
+        },
+        state: state.audio,
+        label: {
+          enabled: "Sounds enabled",
+          disabled: "Sounds disabled",
+        },
+      },
+      {
+        name: "random",
+        action: () => {
+          setSetting(BlockSettingChange.RANDOM, !state.random);
+        },
+        state: state.random,
+        label: {
+          enabled: "Random shapes",
+          disabled: "Ordered shapes",
+        },
+      },
+    ]);
+
     return {
       changeBlock,
       state,
       BlockAction,
-      setSetting,
-      SettingAction: BlockSettingChange,
+      settingsMenu,
     };
   },
 });

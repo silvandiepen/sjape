@@ -151,27 +151,41 @@
 }
 
 .info-block {
+  $block: &;
+
+  &--active {
+    #{$block}__background {
+      opacity: 0.5;
+      pointer-events: all;
+    }
+    #{$block}__container {
+      transform: translate(0%, -50%);
+    }
+  }
   &__background {
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: var(--background-accent);
-    opacity: 0.5;
+    opacity: 0;
     display: block;
     position: fixed;
+    transition: background 0.3s;
+    pointer-events: none;
   }
   &__container {
     --line: 1em;
     position: absolute;
-    left: 50%;
+    right: 0%;
     top: 50%;
     width: 310px;
-    transform: translate(-50%, -50%);
+    transform: translate(100%, -50%);
     background-color: var(--background);
     box-shadow: 0 0 3em 0 var(--background-accent);
     max-height: 80vh;
-    border-radius: 0.5em;
+    border-radius: 0.5em 0 0.5em 0;
+    transition: transform 0.3s;
   }
   &__config {
     padding: 1em;

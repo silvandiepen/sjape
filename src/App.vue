@@ -15,6 +15,11 @@ $percentage: 50%;
   --secondary: #{mix(white, $shade, $percentage)};
   --tertiary: #{mix(skyblue, $shade, $percentage)};
   --quaternary: #{mix(orange, $shade, $percentage)};
+
+  // --primary: #{mix(blue, $shade, $percentage)};
+  // --secondary: #{mix(green, $shade, $percentage)};
+  // --tertiary: #{mix(yellow, $shade, $percentage)};
+  // --quaternary: #{mix(lime, $shade, $percentage)};
 }
 body,
 html {
