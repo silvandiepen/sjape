@@ -1,18 +1,6 @@
 <template>
-  <Blocks />
+  <router-view></router-view>
 </template>
-
-<script lang="ts">
-import { defineComponent } from "vue";
-import Blocks from "./components/Blocks.vue";
-
-export default defineComponent({
-  name: "App",
-  components: {
-    Blocks,
-  },
-});
-</script>
 
 <style lang="scss">
 body,

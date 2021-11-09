@@ -16,6 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 enum BlockType {
   SQUARE = "square",
@@ -53,6 +54,9 @@ export default defineComponent({
   name: "HelloWorld",
 
   setup() {
+    const router = useRouter();
+    const route = useRoute();
+
     const total = 8;
     const types = Object.values(BlockType);
     const colors = Object.values(BlockColor);
@@ -71,10 +75,12 @@ export default defineComponent({
     };
 
     const initBlocks = () => {
-      const stored = localStorage.getItem("sjapes");
-
-      if (stored) {
-        blocks.value = JSON.parse(stored) as Block[];
+      if (route.hash) {
+        const stored = deCompileUrl();
+        if (stored) blocks.value = stored;
+      } else if (localStorage.getItem("sjapes")) {
+        const stored = localStorage.getItem("sjapes");
+        if (stored) blocks.value = JSON.parse(stored) as Block[];
       } else {
         for (let i = 1; i < total * total; i++) {
           blocks.value.push(getRandomBlock());
@@ -86,6 +92,20 @@ export default defineComponent({
       initBlocks();
     });
 
+    const deCompileUrl = () =>
+      route.hash
+        .replace("#", "")
+        .split("|")
+        .map((block) => {
+          const parts: string[] = block.split(":");
+          const color = colors[parseInt(parts[0])];
+          const type = types[parseInt(parts[1])];
+          return {
+            color,
+            type,
+          };
+        });
+
     const createUrl = () => {
       const url: string[] = [];
 
@@ -95,11 +115,12 @@ export default defineComponent({
 
         url.push(`${colorIdx}:${typeIdx}`);
       });
-      return url.join("|");
+      return `#${url.join("|")}`;
     };
 
     const setRoute = () => {
-      // console.log(createUrl());
+      const url = createUrl();
+      router.push({ name: "Home", hash: url });
     };
 
     const changeBlock = (id: number) => {
