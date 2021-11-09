@@ -12,6 +12,25 @@
       @click="changeBlock(idx)"
     />
   </div>
+  <div class="info-block" v-if="showInfo">
+    <div class="info-block__background" @click="showInfo = !showInfo"></div>
+    <div class="info-block__container">
+      <div class="info-block__type" v-for="(type, idx) in types" :key="idx">
+        <div
+          class="info-block__block blocks__block blocks__block--red"
+          :class="`blocks__block--${type}`"
+        ></div>
+        <div class="info-block__text">
+          <strong>{{ idx }} </strong><br /><span> {{ type }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    class="info-trigger"
+    :class="showInfo && `info-trigger--active`"
+    @click="showInfo = !showInfo"
+  ></button>
 </template>
 
 <script lang="ts">
@@ -19,8 +38,11 @@ import { defineComponent, ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
 enum BlockType {
+  EMPTY = "empty",
   SQUARE = "square",
   CIRCLE = "circle",
+  DOT = "dot",
+  DIAMOND = "diamond",
   CIRCLELINE = "circle-line",
   MOONLINE1 = "moon-line1",
   MOONLINE2 = "moon-line2",
@@ -34,9 +56,6 @@ enum BlockType {
   MOON2 = "moon2",
   MOON3 = "moon3",
   MOON4 = "moon4",
-  DOT = "dot",
-  EMPTY = "empty",
-  DIAMOND = "diamond",
 }
 
 enum BlockColor {
@@ -57,6 +76,8 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
+    const showInfo = ref(false);
+
     const total = 8;
     const types = Object.values(BlockType);
     const colors = Object.values(BlockColor);
@@ -75,16 +96,22 @@ export default defineComponent({
     };
 
     const initBlocks = () => {
-      if (route.hash) {
-        const stored = deCompileUrl();
-        if (stored) blocks.value = stored;
-      } else if (localStorage.getItem("sjapes")) {
-        const stored = localStorage.getItem("sjapes");
-        if (stored) blocks.value = JSON.parse(stored) as Block[];
-      } else {
-        for (let i = 1; i < total * total; i++) {
-          blocks.value.push(getRandomBlock());
+      const url = deCompileUrl();
+      const stored = localStorage.getItem("sjapes");
+      const fromLocal = stored && (JSON.parse(stored) as Block[]);
+
+      blocks.value = [];
+
+      for (let i = 0; i < total * total; i++) {
+        let value: Block;
+        if (url[i]) {
+          value = url[i];
+        } else if (fromLocal && fromLocal[i]) {
+          value = fromLocal[i];
+        } else {
+          value = getRandomBlock();
         }
+        blocks.value.push(value);
       }
     };
 
@@ -133,6 +160,8 @@ export default defineComponent({
       total,
       blocks,
       changeBlock,
+      types,
+      showInfo,
     };
   },
 });
@@ -287,6 +316,96 @@ $percentage: 50%;
     &--dot::before {
       transform: translate(-50%, -50%) scale(0.5);
     }
+  }
+}
+
+.info-block {
+  &__background {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--background-accent);
+    opacity: 0.5;
+    display: block;
+    position: fixed;
+  }
+  &__container {
+    --line: 1em;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 310px;
+    transform: translate(-50%, -50%);
+    // padding: 2em;
+    display: flex;
+    background-color: var(--background);
+    box-shadow: 0 0 3em 0 var(--background-accent);
+    max-height: 80vh;
+    flex-wrap: wrap;
+    border-radius: 0.5em;
+    padding: 1em;
+    gap: 1em;
+  }
+
+  &__block {
+    display: block;
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+  &__type {
+    width: 80px;
+    height: 80px;
+    border-radius: 0.25em;
+    background-color: var(--background-accent);
+    align-items: center;
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+      .info-block__text {
+        opacity: 1;
+      }
+    }
+  }
+  &__text {
+    position: absolute;
+    background-color: var(--background);
+    padding: 1em;
+    border-radius: 0.5em;
+    color: var(--foreground);
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    z-index: 3;
+  }
+}
+.info-trigger {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  background-color: var(--background-accent);
+  width: 2em;
+  height: 2em;
+  border-radius: 0.25em;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &::before {
+    content: "";
+    width: 1em;
+    height: 1em;
+    background-color: var(--background);
+    border-radius: 0%;
+    transition: all 0.3s ease-in-out;
+    display: block;
+  }
+  &--active::before {
+    background-color: var(--foreground);
+    border-radius: 50%;
   }
 }
 </style>
