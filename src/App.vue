@@ -3,10 +3,18 @@
 </template>
 
 <style lang="scss">
+$shade: purple;
+$percentage: 50%;
+
 :root {
   --foreground: white;
   --background: #21213a;
   --background-accent: #{darken(#21213a, 10%)};
+
+  --primary: #{mix(red, $shade, $percentage)};
+  --secondary: #{mix(white, $shade, $percentage)};
+  --tertiary: #{mix(skyblue, $shade, $percentage)};
+  --quaternary: #{mix(orange, $shade, $percentage)};
 }
 body,
 html {
