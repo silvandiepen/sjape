@@ -53,3 +53,13 @@ export interface State {
   colors: BlockColor[];
   blocks: Block[];
 }
+
+export interface BlockSettingMenu {
+  name: string;
+  action: () => void;
+  state: boolean;
+  label: {
+    enabled: string;
+    disabled: string;
+  };
+}
